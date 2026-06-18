@@ -4,7 +4,6 @@ import { links } from '@/lib/schema'
 import { desc, eq } from 'drizzle-orm'
 import { generateSlug, validateCustomSlug } from '@/lib/slugs'
 import { getSession } from '@/lib/session'
-import { env } from '@/lib/env'
 
 export async function GET() {
   const session = await getSession()
@@ -55,8 +54,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const [created] = await db.insert(links).values({ slug, targetUrl }).returning()
+    const origin = new URL(req.url).origin
     return NextResponse.json(
-      { link: created, shortUrl: `${env.BASE_URL}/${created.slug}` },
+      { link: created, shortUrl: `${origin}/${created.slug}` },
       { status: 201 }
     )
   } catch (err: unknown) {
